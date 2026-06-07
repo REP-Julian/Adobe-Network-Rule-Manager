@@ -16,11 +16,17 @@ if not is_admin():
     ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, params, None, 1)
     sys.exit()
 
+def resource_path(relative_path):
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
+
 def browse_path():
     filepath = filedialog.askopenfilename(filetypes=[("Executable Files", "*.exe"), ("All Files", "*.*")])
     if filepath:
         dir_entry.delete(0, tk.END)
-        # Convert path to use Windows backslashes
         dir_entry.insert(0, os.path.normpath(filepath))
 
 def apply_rules():
@@ -49,7 +55,6 @@ def apply_rules():
                 return
 
     exe_files = []
-    # Normalize the path strictly to Windows format for Firewall
     target_path = os.path.normpath(target_path)
     
     if os.path.isfile(target_path) and target_path.lower().endswith(".exe"):
@@ -82,7 +87,6 @@ def apply_rules():
             except subprocess.CalledProcessError as e:
                 error_count += 1
                 if not error_message:
-                    # netsh often prints errors to stdout instead of stderr
                     error_message = e.stderr.strip() or e.stdout.strip()
 
         if block_out:
@@ -102,7 +106,12 @@ def apply_rules():
     subprocess.Popen("wf.msc", shell=True)
 
 root = tk.Tk()
-root.title("Adobe Network Rule Manager")
+root.title("Task Manager")
+icon_path = resource_path("Adobe.ico")
+try:
+    root.iconbitmap(icon_path)
+except Exception:
+    pass
 root.geometry("1280x720")
 root.state('normal')
 root.resizable(True, True)
@@ -122,11 +131,25 @@ adobe_list.pack(fill="both", expand=True, padx=10, pady=10)
 products = [
     "Adobe Photoshop",
     "Adobe Illustrator",
+    "Adobe InDesign",
     "Adobe Premiere Pro",
     "Adobe After Effects",
-    "Adobe InDesign",
     "Adobe Lightroom",
-    "Adobe Acrobat Pro"
+    "Adobe Lightroom Classic",
+    "Adobe Acrobat Pro",
+    "Adobe Audition",
+    "Adobe Animate",
+    "Adobe Dreamweaver",
+    "Adobe InCopy",
+    "Adobe Character Animator",
+    "Adobe Media Encoder",
+    "Adobe Bridge",
+    "Adobe Express",
+    "Adobe Fresco",
+    "Adobe Firefly",
+    "Adobe XD",
+    "Adobe Dimension",
+    "Adobe Aero"
 ]
 
 for item in products:
@@ -161,6 +184,9 @@ outbound_check.pack(anchor="w", padx=20, pady=5)
 
 button_frame = tk.Frame(bottom_right_frame)
 button_frame.pack(side="bottom", fill="x", pady=20, padx=20)
+
+credits_label = tk.Label(button_frame, text="Credits: Julian", font=("Arial", 10), fg="gray")
+credits_label.pack(side="left", padx=5)
 
 start_btn = tk.Button(button_frame, text="Start", font=("Arial", 12), width=10, command=apply_rules)
 start_btn.pack(side="right", padx=5)
